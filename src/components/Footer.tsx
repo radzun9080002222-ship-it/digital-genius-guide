@@ -6,7 +6,7 @@ const Footer = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="text-center md:text-left">
-            <div className="text-2xl font-bold text-gradient mb-2">AI Обучение</div>
+            <div className="text-2xl font-bold text-gradient mb-2">База Интеллекта</div>
             <p className="text-muted-foreground">
               Персональные уроки по искусственному интеллекту
             </p>
