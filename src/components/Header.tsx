@@ -15,7 +15,7 @@ const Header = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="text-xl font-bold text-gradient">AI Обучение</div>
+          <div className="text-xl font-bold text-gradient">База Интеллекта</div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
