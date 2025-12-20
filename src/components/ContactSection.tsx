@@ -5,15 +5,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MessageCircle, Phone, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+const GOOGLE_FORM_ACTION =
+  "https://docs.google.com/forms/d/e/1FAIpQLSdi4U3cDamnf6ehOUtuDyNkxGdAodwGcB0QVGvZIk1hLnxzJQ/formResponse";
+
+// Поля твоей Google Form
+const FIELD_NAME = "entry.1199709693";
+const FIELD_PHONE = "entry.862579038";
+
 const ContactSection = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [hp, setHp] = useState(""); // honeypot (скрытое поле от ботов)
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    // anti-bot: если скрытое поле заполнено — молча игнорируем
+    if (hp) return;
+
     if (!name.trim() || !phone.trim()) {
       toast({
         title: "Заполните все поля",
@@ -25,21 +36,35 @@ const ContactSection = () => {
 
     setIsSubmitting(true);
 
-    // Формируем сообщение для Telegram
-    const message = encodeURIComponent(`Новая заявка на обучение ИИ!\n\nИмя: ${name}\nТелефон: ${phone}`);
-    const telegramUrl = `https://t.me/radzun_da?text=${message}`;
+    try {
+      const data = new FormData();
+      data.append(FIELD_NAME, name.trim());
+      data.append(FIELD_PHONE, phone.trim());
 
-    // Открываем Telegram с предзаполненным сообщением
-    window.open(telegramUrl, "_blank");
+      // no-cors: браузер не даст прочитать ответ, но отправка пройдёт
+      await fetch(GOOGLE_FORM_ACTION, {
+        method: "POST",
+        mode: "no-cors",
+        body: data,
+      });
 
-    toast({
-      title: "Заявка отправляется",
-      description: "Telegram откроется в новой вкладке. Нажмите 'Отправить' для завершения заявки.",
-    });
+      toast({
+        title: "Заявка отправлена ✅",
+        description: "Спасибо! Я скоро свяжусь с вами для обсуждения деталей.",
+      });
 
-    setIsSubmitting(false);
-    setName("");
-    setPhone("");
+      setName("");
+      setPhone("");
+      setHp("");
+    } catch {
+      toast({
+        title: "Не удалось отправить заявку",
+        description: "Попробуйте ещё раз или напишите в Telegram справа.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -83,6 +108,7 @@ const ContactSection = () => {
                       onChange={(e) => setName(e.target.value)}
                     />
                   </div>
+
                   <div>
                     <label htmlFor="phone" className="block text-sm font-medium mb-2">
                       Телефон
@@ -95,6 +121,19 @@ const ContactSection = () => {
                       onChange={(e) => setPhone(e.target.value)}
                     />
                   </div>
+
+                  {/* Honeypot (скрыто) */}
+                  <div className="hidden" aria-hidden="true">
+                    <label htmlFor="company">Company</label>
+                    <Input
+                      id="company"
+                      tabIndex={-1}
+                      autoComplete="off"
+                      value={hp}
+                      onChange={(e) => setHp(e.target.value)}
+                    />
+                  </div>
+
                   <Button
                     type="submit"
                     variant="hero"
@@ -104,6 +143,10 @@ const ContactSection = () => {
                   >
                     {isSubmitting ? "Отправка..." : "Отправить заявку"}
                   </Button>
+
+                  <div className="text-xs text-muted-foreground">
+                    Нажимая «Отправить заявку», вы соглашаетесь на обработку данных для связи.
+                  </div>
                 </form>
               </CardContent>
             </Card>
@@ -139,10 +182,7 @@ const ContactSection = () => {
                     </div>
                     <div>
                       <div className="font-semibold mb-1">Телефон</div>
-                      <a
-                        href="tel:+79384504330"
-                        className="text-primary hover:underline"
-                      >
+                      <a href="tel:+79384504330" className="text-primary hover:underline">
                         +7 938 450-43-30
                       </a>
                     </div>
@@ -153,7 +193,7 @@ const ContactSection = () => {
               <div className="p-6 rounded-xl bg-gradient-primary text-primary-foreground">
                 <div className="text-lg font-bold mb-2">🎁 Бонус каждому ученику</div>
                 <p className="opacity-90">
-                  Годовая PRO-подписка на ИИ-модель стоимостью 10 000₽ — бесплатно!
+                  Годовая PRO-подписка на ИИ-модель стоимостью 20 000₽ — бесплатно!
                 </p>
               </div>
             </div>
